@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Reviews</title>
+</head>
+<body>
+    <h1>Order Reviews</h1>
+    <ul>
+        {% for review in order_reviews %}
+            <li>{{ review.review_text }}</li>
+            <li>{{ review.order_id }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

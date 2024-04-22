@@ -42,11 +42,10 @@ class SessionManager:
         session = self.sessions.pop(user_id, None)
         if session:
             session.close()
-            session.bind.dispose()
             del self.user_uris[user_id]
 
     def close_all_sessions(self):
-        for user_id in list(self.sessions.keys()):
+        for user_id in self.sessions:
             self.close_session(user_id)
 
 
@@ -64,13 +63,23 @@ def get_db_engine(user_role):
 
 
 def check_db_connection():
-    engine = get_db_engine(session['userrole'])
+    global engine
+    engine = getattr(g, 'db_engine', None)
+    if engine is None:
+        engine = get_db_engine(session['userrole'])
     with engine.connect() as connection:
         try:
             connection.execute(text('SELECT 1'))
             print('Підключення до бази даних успішне')
         except Exception as e:
             print(f'Помилка підключення до бази даних: {str(e)}')
+    # engine = get_db_engine(session['userrole'])
+    # with engine.connect() as connection:
+    #     try:
+    #         connection.execute(text('SELECT 1'))
+    #         print('Підключення до бази даних успішне')
+    #     except Exception as e:
+    #         print(f'Помилка підключення до бази даних: {str(e)}')
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -133,7 +142,7 @@ def login():
             return render_template('success.html')
             #return redirect(url_for('index', userrole=user.user_role))
         else:
-            flash('Помилка при реєстрації користувача', 'error')
+            flash('Помилка при ідентифікації користувача', 'error')
             return render_template('fail_login.html')
             # return redirect(url_for('login'))
 
@@ -217,14 +226,14 @@ class ProductToOrder(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
 
 
-def get_db_session():
-    if 'db_session' not in g:
-        db_uri = connections.get(session.get('userrole'))
-        if db_uri:
-            engine = create_engine(db_uri, poolclass=NullPool)
-            Session = sessionmaker(bind=engine)
-            g.db_session = Session()
-    return g.db_session
+# def get_db_session():
+#     if 'db_session' not in g:
+#         db_uri = connections.get(session.get('userrole'))
+#         if db_uri:
+#             engine = create_engine(db_uri, poolclass=NullPool)
+#             Session = sessionmaker(bind=engine)
+#             g.db_session = Session()
+#     return g.db_session
 
 
 @app.teardown_appcontext
@@ -253,15 +262,17 @@ def get_orders():
     orders = Order.query.all()
     return render_template('orders.html', orders=orders)
 
+@app.route('/order_reviews', methods=['GET'])
+def get_order_reviews():
+    order_reviews = OrderReview.query.all()
+    return render_template('order_reviews.html', order_reviews=order_reviews)
 
-# Функція для аутентифікації користувача
-# def authenticate(username, password):
-#     user = User.query.filter_by(username=username).first()
-#     if user and check_password_hash(user.encoded_password, password):
-#         session['user_id'] = user.user_id
-#         session['role'] = user.user_role
-#         return True
-#     return False
+@app.route('/product_reviews', methods=['GET'])
+def get_product_reviews():
+    product_reviews = ProductReview.query.all()
+    return render_template('product_reviews.html', product_reviews=product_reviews)
+
+
 #
 # # Функція для перевірки ролі користувача
 # def is_admin_or_analyst():
@@ -276,13 +287,15 @@ def logout():
     # Видаляємо всі дані сесії користувача
     session_manager.close_session(session['userid'])
     session.clear()
-    g.db_session.close()
+    engine.dispose()
 
     # Викликаємо teardown функцію для закриття підключення до бази даних
-    #teardown_db_session()
+    teardown_db_session()
     flash('Ви вийшли з облікового запису', 'success')
     return render_template('logout.html')
     # return redirect(url_for('login'))
+
+
 
 
 if __name__ == '__main__':
