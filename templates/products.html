@@ -4,18 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products</title>
+    <!-- Подключение стилей -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 960px;
+            margin: auto;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        h3 {
+            margin-top: 0;
+        }
+        p {
+            margin-top: 5px;
+            margin-bottom: 0;
+        }
+        strong {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>Products</h1>
-    <ul>
-        {% for product in products %}
-        <li>
-            <h2>{{ product.name }}</h2>
-            <p><strong>Description:</strong> {{ product.description }}</p>
-            <p><strong>Price:</strong> ${{ product.price }}</p>
-            <p><strong>Quantity:</strong> {{ product.quantity }}</p>
-        </li>
-        {% endfor %}
-    </ul>
+{% include 'menu.html' %}
+    <div class="container">
+        <h2>Products</h2>
+        <ul>
+            {% for product in products %}
+            <li>
+                <h3>{{ product.name }}</h3>
+                <p><strong>Description:</strong> {{ product.description }}</p>
+                <p><strong>Price:</strong> ${{ product.price }}</p>
+                <p><strong>Quantity:</strong> {{ product.quantity }}</p>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
 </body>
 </html>
