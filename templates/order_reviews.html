@@ -3,14 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <title>Order Reviews</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <link rel="stylesheet" href="../static/css/pages.css">
 </head>
 <body>
-    <h1>Order Reviews</h1>
+<div class="container">
+    {% include 'index.html' %}
+    <h1>Відгуки про замовлення</h1>
     <ul>
         {% for review in order_reviews %}
-            <li>{{ review.review_text }}</li>
-            <li>{{ review.order_id }}</li>
+            <li class="product_item">
+                <h2>Замовлення #{{ review.order_id }}</h2>
+                <p><strong>Відгук:</strong>{{ review.review_text }}</p>
+                <p><strong>Оцінка (1-5):</strong>{{ review.rating }}</p>
+            </li>
         {% endfor %}
     </ul>
+</div>
 </body>
 </html>

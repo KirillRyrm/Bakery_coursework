@@ -33,6 +33,19 @@
             color: #dc3545;
             margin-bottom: 20px;
         }
+
+        a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1b4bdc;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        a:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -45,11 +58,8 @@
             {% endif %}
         {% endwith %}
 
-        <h2>User is not loginned</h2>
-        <a href="{{ url_for('login') }}">Назад</a>
+{#        <h2>User is not loginned</h2>#}
+        <a href="{{ url_for(path) }}">Назад</a>
     </div>
 </body>
 </html>
-
-{#</body>#}
-{#</html>#}

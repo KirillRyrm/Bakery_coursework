@@ -2,28 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Пекарня</title>
+    <title>Menu</title>
     <link rel="stylesheet" href="../static/css/styles.css">
+    <style>
+        {#body {#}
+        {#    background-image: url('../static/bakery.jpeg');#}
+        {#    background-size: cover;#}
+        {#    background-position: center;#}
+        {#    color: #792929;#}
+        {#    margin: 0;#}
+        {#    padding: 0;#}
+
+
+        {#header {#}
+        {#    background-color: rgba(0, 0, 0, 0.5); /* Черный полупрозрачный фон */#}
+        {#    padding: 20px 0; /* Внутренние отступы сверху и снизу */#}
+        {#    position: fixed; /* Фиксированное позиционирование */#}
+        {#    width: 100%; /* Ширина по всей доступной области */#}
+        {#    z-index: 1; /* Уровень слоя, чтобы быть выше картинки */#}
+
+        {##}
+        {#.container {#}
+        {#    text-align: center;#}
+        {#    padding-top: 100px; /* Отступ сверху для контента */#}
+
+
+
+        {#nav ul {#}
+        {#    list-style-type: none;#}
+        {#    padding: 0;#}
+
+        {##}
+        {#nav ul li {#}
+        {#    display: inline;#}
+        {#    margin-right: 20px;#}
+
+
+    </style>
 </head>
 <body>
-    {% include 'menu.html' %}
-{#    <div class="container">#}
-{#        <h1>Пекарня</h1>#}
-{#        <nav>#}
-{#            <ul>#}
-{#                {% if session.get('userid') %}#}
-{#                    <li><a href="/products">Продукти</a></li>#}
-{#                    <li><a href="/orders">Замовлення</a></li>#}
-{#                    <li><a href="/order_reviews">Відгуки про замовлення</a></li>#}
-{#                    <li><a href="/product_reviews">Відгуки продуктів</a></li>#}
-{#                    <li><a href="/logout">Вийти</a></li>#}
-{#                {% else %}#}
-{#                    <li><a href="/register">Регістрація</a></li>#}
-{#                    <li><a href="/login">Авторизація</a></li>#}
-{#                {% endif %}#}
-{#            </ul>#}
-{#        </nav>#}
-{#    </div>#}
+
+<div class="container">
+    <h1>Пекарня</h1>
+
+    {% if session.get('userrole') %}
+    <nav>
+        <ul>
+            <li><a href="/profile">Особистий кабінет</a></li>
+        </ul>
+    </nav>
+    {% endif %}
+
+    <nav>
+        <ul>
+            {% if session.get('userid') %}
+                <li><a href="/products">Продукти</a></li>
+                <li><a href="/orders">Замовлення</a></li>
+                <li><a href="/order_reviews">Відгуки про замовлення</a></li>
+                <li><a href="/product_reviews">Відгуки продуктів</a></li>
+                {% if session.get('userrole') == 2 %}
+                    <li><a href="/add_money">Поповнити баланс</a></li>
+                {% endif %}
+                <li><a href="/logout">Вийти</a></li>
+
+            {% else %}
+                <li><a href="/register">Регістрація</a></li>
+                <li><a href="/login">Авторизація</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+</div>
+
 </body>
 </html>

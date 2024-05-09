@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        textarea,
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        input[type="submit"] {
+            background-color: #1c398a;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #214288;
+        }
+    </style>
+</head>
+<body>
+{% include 'index.html' %}
+<h1>Додати продукт</h1>
+<form method="POST" action="/add_product">
+    <label for="name">Назва:</label><br>
+    <input type="text" id="name" name="name"><br>
+    <label for="description">Опис:</label><br>
+    <textarea id="description" name="description"></textarea><br>
+    <label for="price">Ціна:</label><br>
+    <input type="number" id="price" name="price" step="0.01"><br>
+    <label for="quantity">Кількість:</label><br>
+    <input type="number" id="quantity" name="quantity"><br>
+    <input type="submit" value="Додати продукт">
+</form>
+</body>
+</html>

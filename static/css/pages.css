@@ -1,0 +1,102 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f3f3f3;
+    margin: 0;
+    padding: 20px;
+}
+
+.container {
+    max-width: 960px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+.product_item {
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+h3 {
+    margin-top: 0;
+}
+
+p {
+    margin-top: 5px;
+    margin-bottom: 0;
+}
+
+strong {
+    font-weight: bold;
+}
+
+.btn-primary {
+    display: inline-block; /* Используйте block, чтобы кнопка была блочным элементом */
+    margin: 20px auto;
+    padding: 10px 20px;
+    background-color: #1e5924;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2c673f;
+}
+
+.btn-update,
+.btn-delete {
+    display: inline-block;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    margin-left: 10px;
+}
+
+.btn-update {
+    background-color: #1c398a;
+}
+
+.btn-update:hover {
+    background-color: #214288;
+}
+
+.btn-delete {
+    background-color: #cb161c;
+}
+
+.btn-delete:hover {
+    background-color: #9b1049;
+}
+
+.balance-container {
+    text-align: center;
+    margin-top: 20px; /* Регулируйте отступ сверху, чтобы выровнять баланс по центру */
+}
+
+h1 {
+    text-align: center;
+    padding-top: 50px;
+    font-size: 48px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-bottom: 50px; /* Отступ снизу для заголовка */
+}

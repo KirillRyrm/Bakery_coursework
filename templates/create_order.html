@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Order</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <link rel="stylesheet" href="../static/css/pages.css">
+</head>
+<body>
+{% include 'index.html' %}
+    <h1>Нове замовлення</h1>
+    <form method="post">
+        {% for product in products %}
+            <div class="container">
+                <label for="product_{{ product.product_id }}">{{ product.name }}</label>
+                <p><strong>Опис:</strong> {{ product.description }}</p>
+                <p><strong>Ціна:</strong> ${{ product.price }}</p>
+                <p><strong>Кількість:</strong> {{ product.quantity }}</p>
+                <input type="number" id="product_{{ product.product_id }}" name="product_{{ product.product_id }}" min="0" value="0">
+
+            </div>
+        {% endfor %}
+        <div class="container">
+        <button type="submit" class="btn btn-primary">Створити замовлення</button>
+        </div>
+    </form>
+
+</body>
+</html>
