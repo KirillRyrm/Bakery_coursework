@@ -17,9 +17,50 @@
                 <h2>Замовлення #{{ review.order_id }}</h2>
                 <p><strong>Відгук:</strong>{{ review.review_text }}</p>
                 <p><strong>Оцінка (1-5):</strong>{{ review.rating }}</p>
+                {% if session.get('userrole') == 2 %}
+                    <a href="{{ url_for('edit_order_review', review_order_id=review.review_order_id) }}"
+                       class="btn btn-update">Оновити відгук замовлення</a>
+                    <button type="button" class="btn-delete" onclick="deleteOrderReview({{ review.review_order_id }})">
+                        Видалити
+                        відгук замовлення
+                    </button>
+                {% endif %}
             </li>
         {% endfor %}
     </ul>
 </div>
-</body>
-</html>
+
+<script>
+
+
+    function deleteOrderReview(review_order_id) {
+        if (confirm('Ви впевнені, що хочете видалити відгук замовлення?')) {
+            fetch(`/delete_order_review/${review_order_id}`, {
+                method: 'DELETE',
+                body: JSON.stringify({
+                    review_order_id: review_order_id
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Помилка видалення замовлення');
+                    }
+
+                    window.location.reload();
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message); // Выводим сообщение об успешном удалении
+                    // Можно выполнить дополнительные действия после успешного удаления
+                    // Например, перезагрузить страницу или обновить список заказов
+                })
+                .catch(error => {
+                    console.error('Помилка:', error);
+                    alert(error.message);
+                });
+        }
+    }
+</script>
+
+    </body>
+    </html>

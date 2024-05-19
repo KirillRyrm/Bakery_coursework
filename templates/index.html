@@ -60,9 +60,11 @@
                 <li><a href="/orders">Замовлення</a></li>
                 <li><a href="/order_reviews">Відгуки про замовлення</a></li>
                 <li><a href="/product_reviews">Відгуки продуктів</a></li>
+                <li><a href="/recipies">Рецепти</a></li>
                 {% if session.get('userrole') == 2 %}
                     <li><a href="/add_money">Поповнити баланс</a></li>
                 {% endif %}
+                <li><a href="/orders_with_details">Повна інформація замовлень</a></li>
                 <li><a href="/logout">Вийти</a></li>
 
             {% else %}

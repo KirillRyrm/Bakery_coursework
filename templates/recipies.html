@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recipies</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <link rel="stylesheet" href="../static/css/pages.css">
+
+</head>
+<body>
+{% include 'index.html' %}
+
+<div class="container">
+    <h2>Рецепти</h2>
+    {#    {% if session.get('userrole') == 4 %}#}
+    {#        <a href="{{ url_for('add_product') }}" class="btn btn-primary">Додати продукт</a>#}
+    {#    {% endif %}#}
+    <ul>
+        {% for recipe in recipies %}
+            <li class="product_item">
+                <h3>{{ recipe.name }}</h3>
+                <p><strong>Опис:</strong> {{ recipe.description }}</p>
+                {% if session.get('userrole') in (2, 3, 4) %}
+                    <a href="{{ url_for('edit_recipe', recipe_id=recipe.recipe_id) }}"
+                       class="btn btn-update">Оновити рецепт</a>
+                {% endif %}
+
+                {% if session.get('userrole') in (1, 4) %}
+                    <button onclick="deleteRecipe({{ recipe.recipe_id }})" class="btn btn-delete">Видалити рецепт
+                    </button>
+                {% endif %}
+                {#                {% set product_review = user_session.query(ProductReview).filter_by(product_id=product.product_id, user_id=user_id).first() %}#}
+                {#                {% if session.get('userrole') == 2 %}#}
+                {#                    <a href="{{ url_for('add_product_review', product_id=product.product_id) }}"#}
+                {#                       class="btn btn-primary">Додати відгук продукту</a>#}
+                {#                {% endif %}#}
+                {#                {% if session.get('userrole') in (3, 4) %}#}
+                {#                    <a href="{{ url_for('update_product', product_id=product.product_id) }}"#}
+                {#                       class="btn btn-update">Оновити продукт</a>#}
+                {#                {% endif %}#}
+                {##}
+                {#                {% if session.get('userrole') in (1, 4) %}#}
+                {#                    <button onclick="deleteProduct({{ product.product_id }})" class="btn btn-delete">Видалити продукт#}
+                {#                    </button>#}
+                {#                {% endif %}#}
+
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+
+<script>
+    function deleteRecipe(recipeId) {
+        if (confirm("Ви впевнені, що хочете видалити цей рецепт?")) {
+            fetch(`/delete_recipe/${recipeId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    console.log(response.status);
+                    if (response.ok) {
+                        // Обновляем страницу после успешного удаления
+                        window.location.reload();
+                        return response.json();
+                    } else {
+                        // Выводим сообщение об ошибке
+                        alert('Помилка при видаленні продукту');
+                    }
+
+                })
+
+                .then(data => {
+                    alert(data.message); // Выводим сообщение об успешном удалении
+                    // Можно выполнить дополнительные действия после успешного удаления
+                    // Например, перезагрузить страницу или обновить список заказов
+                })
+                .catch(error => {
+                    console.error('Помилка:', error);
+                });
+        }
+    }
+</script>
+</body>
+</html>

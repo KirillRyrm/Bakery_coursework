@@ -6,14 +6,62 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
     <link rel="stylesheet" href="../static/css/pages.css">
+
+
 </head>
 <body>
-{% include 'index.html' %}
-    <h1>Product Reviews</h1>
+<div class="container">
+    {% include 'index.html' %}
+    <h1>Відгуки продуктів</h1>
     <ul>
         {% for review in product_reviews %}
-            <li>{{ review.review_text }}</li>
+            {% for product in products %}
+                {% if product.product_id == review.product_id %}
+                    <h2>{{ product.name }}</h2>
+                {% endif %}
+            {% endfor %}
+            <p><strong>Відгук:</strong>{{ review.review_text }}</p>
+            <p><strong>Оцінка (1-5):</strong>{{ review.rating }}</p>
+            {% if session.get('userrole') == 2 %}
+                <a href="{{ url_for('edit_product_review', review_id=review.review_id) }}"
+                   class="btn btn-update">Оновити відгук продукта</a>
+                <button type="button" class="btn-delete" onclick="deleteProductReview({{ review.review_id }})">
+                    Видалити відгук продукта
+                </button>
+            {% endif %}
         {% endfor %}
     </ul>
+</div>
+
+<script>
+
+    function deleteProductReview(review_id) {
+        if (confirm('Ви впевнені, що хочете видалити відгук замовлення?')) {
+            fetch(`/delete_product_review/${review_id}`, {
+                method: 'DELETE',
+                body: JSON.stringify({
+                    review_id: review_id
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Помилка видалення замовлення');
+                    }
+
+                    window.location.reload();
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message); // Выводим сообщение об успешном удалении
+                    // Можно выполнить дополнительные действия после успешного удаления
+                    // Например, перезагрузить страницу или обновить список заказов
+                })
+                .catch(error => {
+                    console.error('Помилка:', error);
+                    alert(error.message);
+                });
+        }
+    }
+</script>
 </body>
 </html>

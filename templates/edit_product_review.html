@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+{#    <link rel="stylesheet" href="../static/css/pages.css">#}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f3f3f3;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            resize: vertical; /* Разрешить изменение размера по вертикали */
+            min-height: 100px; /* Минимальная высота текстового поля */
+        }
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background-color: #1c398a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #214288;
+        }
+    </style>
+</head>
+<body>
+{% include 'index.html' %}
+<div class="container">
+<h1>Редагувати відгук до продукта</h1>
+    <form method="POST">
+        <label for="review_text">Текст відгуку:</label><br>
+        <textarea id="review_text" name="review_text" rows="4" cols="50">{{ product_review.review_text }}</textarea><br>
+        <label for="rating">Оцінка:</label><br>
+        <input type="number" id="rating" name="rating" value="{{ product_review.rating }}" min="1" max="5"><br>
+        <button type="submit">Оновити відгук продукта</button>
+    </form>
+</div>
+</body>
+</html>

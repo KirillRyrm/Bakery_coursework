@@ -26,6 +26,11 @@
                 <p><strong>Опис:</strong> {{ product.description }}</p>
                 <p><strong>Ціна:</strong> ${{ product.price }}</p>
                 <p><strong>Кількість:</strong> {{ product.quantity }}</p>
+{#                {% set product_review = user_session.query(ProductReview).filter_by(product_id=product.product_id, user_id=user_id).first() %}#}
+                {% if session.get('userrole') == 2 %}
+                    <a href="{{ url_for('add_product_review', product_id=product.product_id) }}"
+                       class="btn btn-primary">Додати відгук продукту</a>
+                {% endif %}
                 {% if session.get('userrole') in (3, 4) %}
                     <a href="{{ url_for('update_product', product_id=product.product_id) }}"
                        class="btn btn-update">Оновити продукт</a>
