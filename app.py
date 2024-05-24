@@ -14,7 +14,8 @@ from datetime import datetime, date, timedelta
 
 app = Flask(__name__)
 app.secret_key = '78c5441cebb102803b543b56af14707ac27e4d97'
-app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://default_user:5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5@localhost:5432/Bakery"
+app.config[
+    "SQLALCHEMY_DATABASE_URI"] = "postgresql://default_user:5994471abb01112afcc18159f6cc74b4f511b99806da59b3caf5a9c173cacfc5@localhost:5432/Bakery"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 
 db = SQLAlchemy(app)
@@ -58,6 +59,47 @@ class SessionManager:
                     return result.fetchall() if result.returns_rows else None
             except OperationalError as e:
                 print(f"Error executing query: {e}")
+                return None
+        else:
+            print("Session not found.")
+            return None
+
+    def execute_procedure(self, user_id, proc_name, params):
+        session_find = self.get_session(user_id)
+        if session_find:
+            try:
+                with session_find.connection() as connect:
+                    # Построение запроса SQL для вызова процедуры
+                    sql_procedure = text(f"""
+                                    DO $$
+                                    DECLARE
+                                        average_order_rating NUMERIC;
+                                        min_product_rating INT;
+                                        max_product_rating INT;
+                                    BEGIN
+                                        CREATE TEMP TABLE product_ratings_stats (
+                                            average_order_rating NUMERIC,
+                                            min_product_rating INT,
+                                            max_product_rating INT
+                                        );
+
+                                        CALL {proc_name}(product_id_input, average_order_rating, min_product_rating, max_product_rating);
+
+                                        INSERT INTO product_ratings_stats (average_order_rating, min_product_rating, max_product_rating)
+                                        VALUES (average_order_rating, min_product_rating, max_product_rating);
+
+                                        -- Select data from temporary table
+                                        PERFORM * FROM product_ratings_stats;                                    END $$;
+                                    """)
+                    result = connect.execute(sql_procedure, params)
+                    connect.commit()
+                    # result = connect.execute("SELECT * FROM product_ratings_stats").fetchone()
+                    # return result
+
+                    # # Процедура может не возвращать набор строк
+                    return result.fetchall() if result.returns_rows else []
+            except OperationalError as e:
+                print(f"Error executing procedure: {e}")
                 return None
         else:
             print("Session not found.")
@@ -148,7 +190,6 @@ def create_user_and_grant_role(username, password, role='visitor'):
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-
     if request.method == 'POST':
         username = request.form['username']
         email = request.form['email']
@@ -354,7 +395,8 @@ def add_money():
             user.balance += amount
             session['balance'] = user.balance
             db.session.commit()
-            return jsonify({'balance': float(user.balance)}), 200
+            return redirect(url_for('profile'))
+            #return jsonify({'balance': float(user.balance)}), 200
         # Возвращаем пользователя на страницу с продуктами с обновленным балансом
         # return redirect(url_for('get_products'))
 
@@ -374,7 +416,7 @@ def get_products():
         # products = session_manager.execute_query(user_id, query)  #user_session.query(Product).all()
         if products:
             user_session.commit()
-            #user_session.close()
+            # user_session.close()
             # обработка результатов запроса
             return render_template('products.html', products=products)
         else:
@@ -428,19 +470,17 @@ def add_product():
             return redirect(url_for('get_products'))
         except:
             flash('У вас немає прав для додавання продуктів', 'error')
-            return render_template('error_page.html', path='get_products') #redirect(url_for('index'))
+            return render_template('error_page.html', path='get_products')  # redirect(url_for('index'))
     else:
         # Если метод запроса GET, просто показываем форму для добавления продукта
         user_session.close()
         return render_template('add_product.html')
 
 
-
-
 @app.route('/update_product/<int:product_id>', methods=['GET', 'POST'])
 def update_product(product_id):
     # Проверяем, что пользователь авторизован и имеет роль пекаря
-    #if 'userid' in session and session.get('userrole') == 4:
+    # if 'userid' in session and session.get('userrole') == 4:
     user_id = session['userid']
     user_role = session['userrole']
     user_session = session_manager.get_session(user_id)
@@ -466,22 +506,20 @@ def update_product(product_id):
                 flash('Продукт успішно редаговано', 'success')
                 return redirect(url_for('get_products'))
             except:
-                #user_session.rollback()
+                # user_session.rollback()
                 flash('Немає прав доступа для редагування продукта', 'error')
-                return render_template('error_page.html', path='get_products')#redirect(url_for('index'))
+                return render_template('error_page.html', path='get_products')  # redirect(url_for('index'))
         else:
-            user_session.commit() #user_session.close()
+            user_session.commit()  # user_session.close()
             return render_template('update_product.html', product=product)
     else:
         flash('Продукт не знайдено', 'error')
         return redirect(url_for('index'))
 
 
-
-
 @app.route('/delete_product/<int:product_id>', methods=['DELETE'])
 def delete_product(product_id):
-    #if 'userid' in session: #and session.get('userrole') == 4:
+    # if 'userid' in session: #and session.get('userrole') == 4:
     user_id = session['userid']
     user_session = session_manager.get_session(user_id)
     if request.method == 'DELETE':
@@ -498,10 +536,10 @@ def delete_product(product_id):
             except:
                 user_session.rollback()
                 return jsonify({'message': 'Немає прав для видалення'})
-                #flash('Ви не маєте дозволу для видалення продукта', 'error')
-                #return render_template('error_page.html', path='get_products')
+                # flash('Ви не маєте дозволу для видалення продукта', 'error')
+                # return render_template('error_page.html', path='get_products')
             else:
-                #flash('Продукт успішно видалено', 'success')
+                # flash('Продукт успішно видалено', 'success')
                 return jsonify({'message': 'Продукт успішно видалено'}), 200
         else:
             flash('Продукт не знайдено', 'error')
@@ -525,7 +563,7 @@ def get_orders():
             for product_id_in_order in user_session.query(ProductToOrder).filter_by(order_id=order.order_id).all():
                 product = user_session.query(Product).filter_by(product_id=product_id_in_order.product_id).first()
                 products.setdefault(order.order_id, []).append({product.name: product_id_in_order.quantity})
-                #products.setdefault(order.order_id, []).append(product)
+                # products.setdefault(order.order_id, []).append(product)
 
         # user_session.commit()
         user_session.close()
@@ -534,7 +572,6 @@ def get_orders():
     except:
         flash("Ви не маєте права переглядати замовлення")
         return render_template('error_page.html', path='index')
-
 
 
 @app.route('/create_order', methods=['GET', 'POST'])
@@ -605,7 +642,14 @@ def edit_order(order_id):
             if not product_in_order:
                 order_product = ProductToOrder(product_id=product.product_id, order_id=order.order_id,
                                                quantity=quantity)
-                product.quantity -= quantity
+                try:
+                    product.quantity -= quantity
+                    user_session.commit()
+                except IntegrityError:
+                    user_session.rollback()  # Откатываем транзакцию
+                    flash('Недопустима кількість продуктів', 'error')
+                    return render_template('error_page.html', path='create_order')
+                # product.quantity -= quantity
                 user_session.add(order_product)
                 user_session.commit()
 
@@ -637,7 +681,6 @@ def delete_order(order_id):
         product = user_session.query(Product).filter_by(product_id=product_to_order.product_id).first()
         product.quantity += product_to_order.quantity
 
-
     if not order:
         return jsonify({'error': 'Замовлення не знайдене або авторизація не виконана'})
 
@@ -665,7 +708,7 @@ def confirm_order(order_id):
     if not order:
         return jsonify({'error': 'Замовлення не знайдене або авторизація не виконана'})
     try:
-    # if current_user.balance >= order.price:
+        # if current_user.balance >= order.price:
         current_user.balance -= order.price
         db.session.commit()
     # else:
@@ -675,7 +718,6 @@ def confirm_order(order_id):
         return jsonify({'message': 'На жаль, не вистачає коштів на здійснення замовлення'})
     #     return jsonify({'error': 'Помилка при відніманні коштів з балансу користувача'})
 
-
     # Устанавливаем статус заказа как подтвержденный
     order.status = True
 
@@ -683,7 +725,8 @@ def confirm_order(order_id):
     order.start_date = datetime.now()
 
     # Вычисляем end_date по формуле: текущее время + количество продуктов в заказе * некоторое количество минут или часов
-    order_products = user_session.query(ProductToOrder).filter_by(order_id=order.order_id).all()  # len(order.products_to_order)
+    order_products = user_session.query(ProductToOrder).filter_by(
+        order_id=order.order_id).all()  # len(order.products_to_order)
     num_products = sum([product.quantity for product in order_products])
     end_date = datetime.now() + timedelta(minutes=num_products * 7)  # Например, по 7 минут на продукт
     order.end_date = end_date
@@ -708,7 +751,6 @@ def get_order_reviews():
 
     elif user_id and userrole in (1, 3):
         order_reviews = user_session.query(OrderReview).all()
-
 
     user_session.close()
     return render_template('order_reviews.html', order_reviews=order_reviews)
@@ -743,7 +785,7 @@ def add_order_review(order_id):
             new_review = OrderReview(order_id=order_id, review_text=review_text, rating=rating)
             user_session.add(new_review)
             user_session.commit()
-            #flash('Відгук успішно додано', 'success')
+            # flash('Відгук успішно додано', 'success')
             return redirect(url_for('get_order_reviews'))
         except Exception as e:
             flash('Помилка при створенні відгука: ', 'error')
@@ -753,11 +795,10 @@ def add_order_review(order_id):
         return render_template('add_order_review.html', order_id=order_id)
 
 
-
 @app.route('/edit_order_review/<int:review_order_id>', methods=['GET', 'POST'])
 def edit_order_review(review_order_id):
     # Проверяем, что пользователь авторизован и имеет роль пекаря
-    #if 'userid' in session and session.get('userrole') == 4:
+    # if 'userid' in session and session.get('userrole') == 4:
     user_id = session['userid']
     user_role = session['userrole']
     user_session = session_manager.get_session(user_id)
@@ -783,11 +824,11 @@ def edit_order_review(review_order_id):
                 flash('Замовлення успішно редаговано', 'success')
                 return redirect(url_for('get_order_reviews'))
             except:
-                #user_session.rollback()
+                # user_session.rollback()
                 flash('Немає прав доступа для редагування замовлення', 'error')
-                return render_template('error_page.html', path='get_order_reviews')  #redirect(url_for('index'))
+                return render_template('error_page.html', path='get_order_reviews')  # redirect(url_for('index'))
         else:
-            user_session.commit() #user_session.close()
+            user_session.commit()  # user_session.close()
             return render_template('edit_order_review.html', order_id=order.order_id, order_review=order_review)
     else:
         flash('Замовлення не знайдено', 'error')
@@ -796,7 +837,7 @@ def edit_order_review(review_order_id):
 
 @app.route('/delete_order_review/<int:review_order_id>', methods=['DELETE'])
 def delete_order_review(review_order_id):
-    #if 'userid' in session: #and session.get('userrole') == 4:
+    # if 'userid' in session: #and session.get('userrole') == 4:
     user_id = session['userid']
     user_session = session_manager.get_session(user_id)
     if request.method == 'DELETE':
@@ -808,14 +849,13 @@ def delete_order_review(review_order_id):
             except:
                 user_session.rollback()
                 return jsonify({'message': 'Немає прав для видалення'})
-                #flash('Ви не маєте дозволу для видалення продукта', 'error')
-                #return render_template('error_page.html', path='get_products')
+                # flash('Ви не маєте дозволу для видалення продукта', 'error')
+                # return render_template('error_page.html', path='get_products')
             else:
-                #flash('Продукт успішно видалено', 'success')
+                # flash('Продукт успішно видалено', 'success')
                 return jsonify({'message': 'Відгук замовлення успішно видалено'}), 200
         else:
             flash('Продукт не знайдено', 'error')
-
 
 
 @app.route('/product_reviews', methods=['GET'])
@@ -826,12 +866,14 @@ def get_product_reviews():
 
     if user_id and userrole == 2:
         product_reviews = user_session.query(ProductReview).filter_by(user_id=user_id).all()
-        products = [user_session.query(Product).filter_by(product_id=product_review.product_id).first() for product_review in product_reviews]
+        products = [user_session.query(Product).filter_by(product_id=product_review.product_id).first() for
+                    product_review in product_reviews]
 
 
     elif user_id and userrole in (1, 3):
         product_reviews = user_session.query(ProductReview).all()
-        products = [user_session.query(Product).filter_by(product_id=product_review.product_id).first() for product_review in product_reviews]
+        products = [user_session.query(Product).filter_by(product_id=product_review.product_id).first() for
+                    product_review in product_reviews]
 
     user_session.close()
     return render_template('product_reviews.html', product_reviews=product_reviews, products=products)
@@ -865,7 +907,7 @@ def add_product_review(product_id):
             new_review = ProductReview(review_text=review_text, rating=rating, product_id=product_id, user_id=user_id)
             user_session.add(new_review)
             user_session.commit()
-            #flash('Відгук успішно додано', 'success')
+            # flash('Відгук успішно додано', 'success')
             return redirect(url_for('get_product_reviews'))
         except Exception as e:
             flash('Помилка при створенні відгука: ' + str(e), 'error')
@@ -879,7 +921,7 @@ def add_product_review(product_id):
 @app.route('/edit_product_review/<int:review_id>', methods=['GET', 'POST'])
 def edit_product_review(review_id):
     # Проверяем, что пользователь авторизован и имеет роль пекаря
-    #if 'userid' in session and session.get('userrole') == 4:
+    # if 'userid' in session and session.get('userrole') == 4:
     user_id = session['userid']
     user_role = session['userrole']
     user_session = session_manager.get_session(user_id)
@@ -903,11 +945,11 @@ def edit_product_review(review_id):
                 flash('Замовлення успішно редаговано', 'success')
                 return redirect(url_for('get_product_reviews'))
             except:
-                #user_session.rollback()
+                # user_session.rollback()
                 flash('Немає прав доступа для редагування замовлення', 'error')
-                return render_template('error_page.html', path='get_product_reviews')  #redirect(url_for('index'))
+                return render_template('error_page.html', path='get_product_reviews')  # redirect(url_for('index'))
         else:
-            user_session.commit() #user_session.close()
+            user_session.commit()  # user_session.close()
             return render_template('edit_product_review.html', product_review=product_review)
     else:
         flash('Замовлення не знайдено', 'error')
@@ -916,7 +958,7 @@ def edit_product_review(review_id):
 
 @app.route('/delete_product_review/<int:review_id>', methods=['DELETE'])
 def delete_product_review(review_id):
-    #if 'userid' in session: #and session.get('userrole') == 4:
+    # if 'userid' in session: #and session.get('userrole') == 4:
     user_id = session['userid']
     user_session = session_manager.get_session(user_id)
     if request.method == 'DELETE':
@@ -929,7 +971,7 @@ def delete_product_review(review_id):
                 user_session.rollback()
                 return jsonify({'message': 'Немає прав для видалення'})
             else:
-                #flash('Продукт успішно видалено', 'success')
+                # flash('Продукт успішно видалено', 'success')
                 return jsonify({'message': 'Відгук продукта успішно видалено'}), 200
         else:
             flash('Продукт не знайдено', 'error')
@@ -948,7 +990,7 @@ def get_recipies():
         # products = session_manager.execute_query(user_id, query)  #user_session.query(Product).all()
         if recipies:
             user_session.commit()
-            #user_session.close()
+            # user_session.close()
             # обработка результатов запроса
             return render_template('recipies.html', recipies=recipies)
         else:
@@ -959,11 +1001,10 @@ def get_recipies():
         return render_template('login.html')
 
 
-
 @app.route('/edit_recipe/<int:recipe_id>', methods=['GET', 'POST'])
 def edit_recipe(recipe_id):
     # Проверяем, что пользователь авторизован и имеет роль пекаря
-    #if 'userid' in session and session.get('userrole') == 4:
+    # if 'userid' in session and session.get('userrole') == 4:
     user_id = session['userid']
     user_role = session['userrole']
     user_session = session_manager.get_session(user_id)
@@ -987,11 +1028,11 @@ def edit_recipe(recipe_id):
                 flash('Рецепт оновлено', 'success')
                 return redirect(url_for('get_recipies'))
             except:
-                #user_session.rollback()
+                # user_session.rollback()
                 flash('Немає прав доступа для редагування рецепта', 'error')
-                return render_template('error_page.html', path='get_recipies')  #redirect(url_for('index'))
+                return render_template('error_page.html', path='get_recipies')  # redirect(url_for('index'))
         else:
-            user_session.commit() #user_session.close()
+            user_session.commit()  # user_session.close()
             return render_template('edit_recipe.html', recipe=recipe)
     else:
         flash('Рецепт не знайдено', 'error')
@@ -1000,7 +1041,7 @@ def edit_recipe(recipe_id):
 
 @app.route('/delete_recipe/<int:recipe_id>', methods=['DELETE'])
 def delete_recipe(recipe_id):
-    #if 'userid' in session: #and session.get('userrole') == 4:
+    # if 'userid' in session: #and session.get('userrole') == 4:
     user_id = session['userid']
     user_session = session_manager.get_session(user_id)
     if request.method == 'DELETE':
@@ -1013,7 +1054,7 @@ def delete_recipe(recipe_id):
                 user_session.rollback()
                 return jsonify({'message': f'Немає прав для видалення {str(e)}'})
             else:
-                #flash('Продукт успішно видалено', 'success')
+                # flash('Продукт успішно видалено', 'success')
                 return jsonify({'message': 'Відгук рецепта успішно видалено'}), 200
         else:
             flash('Продукт не знайдено', 'error')
@@ -1022,29 +1063,105 @@ def delete_recipe(recipe_id):
 @app.route('/orders_with_details')
 def orders_with_details():
     user_id = session.get('userid')
+    userrole = session.get('userrole')
     user_session = session_manager.get_session(user_id)
 
     if not user_id:
         flash('Вам потрібно війти в систему.', 'error')
         return redirect(url_for('login'))
 
-    query = f"""
-        SELECT 
-            o.order_id,
-            o.order_date,
-            o.user_id,
-            o.product_id,
-            o.product_name,
-            o.product_price,
-            o.quantity,
-            o.total_price
-        FROM orders_with_details o
-        WHERE o.user_id = {user_id}
-    """
+    if userrole == 2:
+        query = f"""
+            SELECT 
+                o.order_id,
+                o.order_date,
+                o.user_id,
+                o.product_id,
+                o.product_name,
+                o.product_price,
+                o.quantity,
+                o.total_price
+            FROM orders_with_details o
+            WHERE o.user_id = {user_id}
+            ORDER BY o.order_id
+        """
+    else:
+        query = """SELECT * FROM orders_with_details o ORDER BY o.order_id"""
 
     orders_with_details = session_manager.execute_query(user_id, query)
 
     return render_template('orders_with_details.html', orders_with_details=orders_with_details)
+
+
+
+@app.route('/product_rating/<int:product_id>')
+def product_rating(product_id):
+    user_id = session.get('userid')
+    userrole = session.get('userrole')
+    user_session = session_manager.get_session(user_id)
+
+    if not user_id:
+        flash('Вам потрібно війти в систему.', 'error')
+        return redirect(url_for('login'))
+
+    product = user_session.query(Product).filter_by(product_id=product_id).first()
+    product_name = product.name
+    # Параметры для процедуры
+
+    if user_session:
+        try:
+            with user_session.connection() as connect:
+                # Построение запроса SQL для вызова процедуры
+                sql_procedure = text(f"CALL get_product_ratings_stats({product_id}, NULL, NULL, NULL)")
+                result = connect.execute(sql_procedure)
+                connect.commit()
+
+                # # Процедура может не возвращать набор строк
+                result = result.fetchall() #if result.returns_rows else []
+                print("SQL block executed successfully.")
+                print(f"Result: {result}")
+        except OperationalError as e:
+            print(f"Error executing procedure: {e}")
+            return None
+        else:
+            if result:
+                average_order_rating, min_product_rating, max_product_rating = result[0]
+            else:
+                average_order_rating = min_product_rating = max_product_rating = None
+            return render_template('product_rating.html',
+                                   product_id=product_id,
+                                   product_name=product_name,
+                                   average_order_rating=average_order_rating,
+                                   min_product_rating=min_product_rating,
+                                   max_product_rating=max_product_rating)
+    else:
+        print("Session not found.")
+        return None
+
+
+
+
+@app.route('/products/product_info')
+def product_information():
+    user_id = session.get('userid')
+    userrole = session.get('userrole')
+    user_session = session_manager.get_session(user_id)
+
+    if not user_id:
+        flash('Вам потрібно війти в систему.', 'error')
+        return redirect(url_for('login'))
+
+    if userrole in (3, 4):
+
+        query = """SELECT * FROM product_information pr_info ORDER BY pr_info.product_id"""
+
+        product_info = session_manager.execute_query(user_id, query)
+
+    else:
+        flash('Немає прав для перегляду повної інформації продукта')
+        return render_template('error_page.html', path='get_products')
+
+    return render_template('product_information.html', product_info=product_info)
 
 
 @app.route('/logout')
@@ -1057,8 +1174,6 @@ def logout():
 
     flash('Ви вийшли з облікового запису', 'success')
     return render_template('logout.html')
-
-
 
 
 if __name__ == '__main__':

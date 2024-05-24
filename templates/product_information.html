@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .green_h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .error-message {
+            text-align: center;
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    {% include 'index.html' %}
+    <div class="container">
+        <h1 class="green_h1">Інформація про продукти</h1>
+        {% if product_info %}
+            <table>
+                <tr>
+                    <th>Номер продукту</th>
+                    <th>Назва продукту</th>
+                    <th>Опис продукту</th>
+                    <th>Назва рецепта</th>
+                    <th>Опис рецепта</th>
+                    <th>Середній рейтинг</th>
+                    <th>Загальна кількість проданих</th>
+                </tr>
+                {% for product in product_info %}
+                    <tr>
+                        <td>{{ product.product_id }}</td>
+                        <td>{{ product.product_name }}</td>
+                        <td>{{ product.product_description }}</td>
+                        <td>{{ product.recipe_name }}</td>
+                        <td>{{ product.recipe_description }}</td>
+                        <td>{{ product.average_rating }}</td>
+                        <td>{{ product.total_quantity_sold }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% else %}
+            <p class="error-message">Немає даних для відображення.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

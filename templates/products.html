@@ -19,6 +19,10 @@
     {% if session.get('userrole') == 4 %}
         <a href="{{ url_for('add_product') }}" class="btn btn-primary">Додати продукт</a>
     {% endif %}
+
+    {% if session.get('userrole') in (3, 4) %}
+        <a href="{{ url_for('product_information') }}" class="btn btn-any">Інформація всіх продукти</a>
+    {% endif %}
     <ul>
         {% for product in products %}
             <li class="product_item">
@@ -40,6 +44,9 @@
                     <button onclick="deleteProduct({{ product.product_id }})" class="btn btn-delete">Видалити продукт
                     </button>
                 {% endif %}
+
+                <a href="{{ url_for('product_rating', product_id=product.product_id) }}"
+                       class="btn btn-primary">Рейтинг продукту</a>
 
             </li>
         {% endfor %}

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Product Rating</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        h1 {
+            margin-top: 20px;
+            text-align: center;
+        }
+        h2 {
+            margin-top: 20px;
+            text-align: center;
+        }
+        h3 {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .rating-info {
+            margin: 20px auto;
+            width: 80%;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        p {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .no-rating {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+{% include 'index.html' %}
+<div class="rating-info">
+    <h1>Рейтинг продукту</h1>
+    <h2>Номер продукту: {{ product_id }}</h2>
+    <h3>Назва продукту: {{ product_name }}</h3>
+    {% if average_order_rating != 0 %}
+        <p>Середній рейтинг продукту: {{ average_order_rating }}</p>
+        <p>Мінімальний рейтинг продукту: {{ min_product_rating }}</p>
+        <p>Максимальний рейтинг продукту: {{ max_product_rating }}</p>
+    {% else %}
+        <p class="no-rating">Немає рейтингу для поточного продукту.</p>
+    {% endif %}
+</div>
+</body>
+</html>
