@@ -61,7 +61,7 @@ strong {
 }
 
 .btn-update,
-.btn-any
+.btn-any,
 .btn-delete {
     display: inline-block;
     padding: 10px 20px;

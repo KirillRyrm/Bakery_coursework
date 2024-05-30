@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>Статистика ревью користувачів</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+        .center {
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            outline: none;
+            color: #fff;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 9px #999;
+            margin: 10px auto;
+            display: block;
+            width: fit-content;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .btn:active {
+            background-color: #45a049;
+            box-shadow: 0 5px #666;
+            transform: translateY(4px);
+        }
+    </style>
+</head>
+<body>
+{% include 'index.html' %}
+    <h1>Статистика ревью користувачів</h1>
+    <a href="{{ url_for('get_users') }}" class="btn">Назад до головної</a>
+    {% if users_reviews %}
+    <table>
+        <thead>
+            <tr>
+                <th>ID Замовлення</th>
+                <th>Статус ревью</th>
+                <th>Максимальний рейтинг</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for review in users_reviews %}
+            <tr>
+                <td>{{ review.order_id }}</td>
+                <td>{{ review.review_status }}</td>
+                <td>{{ review.max_rating }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="center">Немає даних про ревью.</p>
+    {% endif %}
+</body>
+</html>

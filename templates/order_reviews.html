@@ -20,11 +20,15 @@
                 {% if session.get('userrole') == 2 %}
                     <a href="{{ url_for('edit_order_review', review_order_id=review.review_order_id) }}"
                        class="btn btn-update">Оновити відгук замовлення</a>
+                {% endif %}
+
+                {% if session.get('userrole') in (1, 2) %}
                     <button type="button" class="btn-delete" onclick="deleteOrderReview({{ review.review_order_id }})">
                         Видалити
                         відгук замовлення
                     </button>
                 {% endif %}
+
             </li>
         {% endfor %}
     </ul>

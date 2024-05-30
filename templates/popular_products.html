@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Популярні продукти</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f8f8f8;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .message {
+            text-align: center;
+            color: #d9534f;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+{% include 'index.html' %}
+    <div class="container">
+        <h1>Популярні продукти</h1>
+        {% if popular_products %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID продукту</th>
+                        <th>Назва продукту</th>
+                        <th>Кількість проданого</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in popular_products %}
+                        <tr>
+                            <td>{{ product.product_id }}</td>
+                            <td>{{ product.product_name }}</td>
+                            <td>{{ product.total_quantity_sold }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="message">Немає популярних продуктів для відображення.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

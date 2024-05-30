@@ -40,14 +40,19 @@
                     <button type="button" class="btn-primary" onclick="confirmOrder({{ order.order_id }})">Підтвердити
                         замовлення
                     </button>
+
+                    <button type="button" class="btn-delete" onclick="deleteOrder({{ order.order_id }})">Видалити
+                        замовлення
+                    </button>
                 {% else %}
                     <a href="{{ url_for('add_order_review', order_id=order.order_id) }}" class="btn btn-primary">Додати
                         відгук</a>
 
-                {% endif %}
-            <button type="button" class="btn-delete" onclick="deleteOrder({{ order.order_id }})">Видалити
-                        замовлення
+                    <button type="button" class="btn-delete" onclick="deleteOrderFromList({{ order.order_id }})">Видалити
+                        замовлення з історії замовлень
                     </button>
+                {% endif %}
+
             </li>
         {% endfor %}
     </ul>
@@ -58,6 +63,37 @@
     function deleteOrder(orderId) {
         if (confirm('Ви впевнені, що хочете видалити замовлення?')) {
             fetch(`/delete_order/${orderId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    order_id: orderId
+                })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Помилка видалення замовлення');
+                    }
+
+                    window.location.reload();
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message); // Выводим сообщение об успешном удалении
+                    // Можно выполнить дополнительные действия после успешного удаления
+                    // Например, перезагрузить страницу или обновить список заказов
+                })
+                .catch(error => {
+                    console.error('Помилка:', error);
+                    alert(error.message);
+                });
+        }
+    }
+
+    function deleteOrderFromList(orderId) {
+        if (confirm('Ви впевнені, що хочете видалити замовлення з історії замовлень?')) {
+            fetch(`/delete_order_from_list/${orderId}`, {
                 method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json'
